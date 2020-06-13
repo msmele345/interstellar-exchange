@@ -1,0 +1,25 @@
+spring:
+  activemq:
+    broker-url: tcp://localhost:61616
+  datasource:
+    url: jdbc:sqlserver://localhost;
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: Weonlyusesqltogether2020
+
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.SQLServer2012Dialect
+      ddl-auto: update
+    show-sql: true
+
+
+
+
+
+destination:
+  jms:
+    inbound: stocks
+
+matcher:
+  interval: 2
