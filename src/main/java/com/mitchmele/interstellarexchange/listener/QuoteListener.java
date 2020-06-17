@@ -33,9 +33,9 @@ public class QuoteListener implements MessageListener {
                 String quoteJson = ((ActiveMQTextMessage) message).getText();
                 log.info("CONSUMED JMS INBOUND MESSAGE WITH PAYLOAD: " + ((ActiveMQTextMessage) message).getText());
                 newQuotes.add(quoteConverter.convert(quoteJson));
-
+                //remove size constraint
                 if (newQuotes.size() == 2) { //modify size matching constraint as needed
-                    realtimeTradeOrchestrator.orchestrate(newQuotes);
+                    realtimeTradeOrchestrator.processRealTimeQuotes(newQuotes);
                 }
             } catch (JMSException e) {
                 e.printStackTrace();

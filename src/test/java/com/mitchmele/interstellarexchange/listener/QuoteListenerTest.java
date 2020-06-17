@@ -49,7 +49,7 @@ class QuoteListenerTest {
     public void onMessage_callsRealtimeTradeOrchestrator_withConvertedQuotes() throws JMSException {
         ActiveMQTextMessage mockMessage = mock(ActiveMQTextMessage.class);
 
-        String incomingAsk = "{\"id\":162,\"symbol\":\"OGC\",\"bidPrice\":23.05,\"timeStamp\":1591614219318,\"price\":23.05}";
+        String incomingAsk = "{\"id\":162,\"symbol\":\"OGC\",\"askPrice\":23.11,\"timeStamp\":1591614219318,\"price\":23.05}";
         String incomingBid = "{\"id\":162,\"symbol\":\"OGC\",\"bidPrice\":23.05,\"timeStamp\":1591614219318,\"price\":23.05}";
         when(mockMessage.getText())
                 .thenReturn(incomingAsk)
@@ -75,6 +75,6 @@ class QuoteListenerTest {
         quoteListener.onMessage(mockMessage);
         quoteListener.onMessage(mockMessage);
 
-        verify(realtimeTradeOrchestrator).orchestrate(asList(expectedAsk, expectedBid));
+        verify(realtimeTradeOrchestrator).processRealTimeQuotes(asList(expectedAsk, expectedBid));
     }
 }
