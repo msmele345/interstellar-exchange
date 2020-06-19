@@ -23,7 +23,7 @@ public class QuoteListener implements MessageListener {
     private final QuoteConverter quoteConverter;
     private final RealtimeTradeOrchestrator realtimeTradeOrchestrator;
 
-    List<QuotePrice> newQuotes = new ArrayList<>();
+    protected List<QuotePrice> newQuotes = new ArrayList<>();
 
     @Override
     public void onMessage(Message message) {
@@ -34,7 +34,7 @@ public class QuoteListener implements MessageListener {
                 log.info("CONSUMED JMS INBOUND MESSAGE WITH PAYLOAD: " + ((ActiveMQTextMessage) message).getText());
                 newQuotes.add(quoteConverter.convert(quoteJson));
                 //remove size constraint
-                if (newQuotes.size() == 2) { //modify size matching constraint as needed
+                if (newQuotes.size() == 10) { //modify size matching constraint as needed
                     realtimeTradeOrchestrator.processRealTimeQuotes(newQuotes);
                 }
             } catch (JMSException e) {

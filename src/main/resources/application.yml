@@ -20,6 +20,7 @@ spring:
 destination:
   jms:
     inbound: stocks
+    errors: errors
 
 matcher:
   interval: 2

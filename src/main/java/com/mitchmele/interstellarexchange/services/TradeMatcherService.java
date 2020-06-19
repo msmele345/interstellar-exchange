@@ -1,15 +1,13 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.mitchmele.interstellarexchange.model.*;
-import com.mitchmele.interstellarexchange.repository.AskRepository;
-import com.mitchmele.interstellarexchange.repository.BidRepository;
 import com.mitchmele.interstellarexchange.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -20,9 +18,8 @@ public class TradeMatcherService {
     private final TradeRepository tradeRepository;
 
     //feed result into this method to create trades and insert into trade repo.
-    //they should all be the same symbol here from the orchestrator
+    //they should all be the same symbol here from the orchestrator or realtime service
     public List<Trade> matchTrades(List<QuotePrice> quotes) {
-        String smallestSize = null;
         List<Trade> trades = new ArrayList<>();
 
         /*
@@ -40,14 +37,10 @@ public class TradeMatcherService {
 
         String symbol = quotes.get(0).getSymbol();
 
-        if (bids.size() <= asks.size()) {
-            smallestSize = "BID";
-        }
-        if (asks.size() < bids.size()) {
-            smallestSize = "ASK";
-        }
-        long range = Long.min(bids.size(), asks.size());
+        String smallestSize = marketDepthCheck(bids, asks);
 
+        long range = Long.min(bids.size(), asks.size());
+        //if bids or asks are zero, range will be zero and no trades will be made.
         for (int i = 0; i < range; i++) {
             Integer bidId = bids.get(i).getId();
             Integer askId = asks.get(i).getId();
@@ -91,8 +84,7 @@ public class TradeMatcherService {
         return trades;
     }
 
-
-    protected String marketDepthCheck(List<Bid> bids, List<Ask> asks) {
+    protected String marketDepthCheck(List<QuotePrice> bids, List<QuotePrice> asks) {
         String smallestDepth = null;
         if (bids.size() == 0 && asks.size() == 0) return "ZERO";
 

@@ -1,0 +1,34 @@
+version: "3.2"
+services:
+
+  activemq:
+    image: rmohr/activemq
+    container_name: activemq-1
+    hostname: activemq-1.vnet
+    ports:
+    - 8161:8161
+    - 61616:61616
+
+  mongodb-1:
+    image: mongo
+    container_name: mongodb-1
+    hostname: mongodb-1.vnet
+    restart: always
+    ports:
+      - 27017:27017
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2019-CU3-ubuntu-18.04
+    container_name: sql1
+    restart: always
+    ports:
+      - 1433:1433
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Weonlyusesqltogether2020
+
+networks:
+  default:
+    external:
+      name: vnet
+

@@ -2,6 +2,7 @@ package com.mitchmele.interstellarexchange.config;
 
 
 import com.mitchmele.interstellarexchange.listener.QuoteListener;
+import com.mitchmele.interstellarexchange.services.JmsErrorHandler;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,10 +28,16 @@ public class LoaderConfig {
     @Value("${destination.jms.inbound}")
     private String stocks;
 
+    @Value("${destination.jms.errors}")
+    private String errors;
+
     @Bean
     Destination quoteDestination() {
         return new ActiveMQQueue(stocks);
     }
+
+    @Bean
+    Destination errorsDestination() { return new ActiveMQQueue(errors); }
 
     //connection factory
     @Bean
@@ -61,13 +68,14 @@ public class LoaderConfig {
 
     @Bean
     DefaultMessageListenerContainer defaultMessageListenerContainer(
-            QuoteListener quoteListener
+            QuoteListener quoteListener,
+            JmsErrorHandler jmsErrorHandler
     ) {
         DefaultMessageListenerContainer defaultMessageListenerContainer = new DefaultMessageListenerContainer();
         defaultMessageListenerContainer.setMessageListener(quoteListener);
         defaultMessageListenerContainer.setConnectionFactory(cachingConnectionFactory());
         defaultMessageListenerContainer.setMessageConverter(jacksonJmsMessageConverter());
-//        defaultMessageListenerContainer.setErrorHandler(jmsQuoteErrorHandler);
+        defaultMessageListenerContainer.setErrorHandler(jmsErrorHandler);
         defaultMessageListenerContainer.setDestinationName(stocks);
         return defaultMessageListenerContainer;
     }
