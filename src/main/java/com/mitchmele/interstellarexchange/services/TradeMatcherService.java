@@ -5,6 +5,9 @@ import com.mitchmele.interstellarexchange.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,11 +24,6 @@ public class TradeMatcherService {
     //they should all be the same symbol here from the orchestrator or realtime service
     public List<Trade> matchTrades(List<QuotePrice> quotes) {
         List<Trade> trades = new ArrayList<>();
-
-        /*
-         * Need logic that checks if the prices are not the same.
-         * Check for how close the bid/ask is and make trade on ask if it works
-         * */
 
         List<QuotePrice> bids = quotes.stream()
                 .filter(q -> q.getClass().equals(Bid.class))
@@ -45,41 +43,48 @@ public class TradeMatcherService {
             Integer bidId = bids.get(i).getId();
             Integer askId = asks.get(i).getId();
             Trade newTrade;
-            if ("BID".equals(smallestSize)) {
-                newTrade = Trade.builder()
-                        .symbol(symbol)
+
+            double askPrice = asks.get(i).getPrice().doubleValue();
+            double bidPrice = bids.get(i).getPrice().doubleValue();
+            double priceDiff = askPrice - bidPrice;
+
+            double threshold = askPrice * .005;
+
+            boolean isTradeMatch = priceDiff <= threshold;
+
+            if (isTradeMatch) {
+                BigDecimal fillPrice = BigDecimal.valueOf(bidPrice + priceDiff / 2);
+
+                Trade coolTrade = Trade.builder()
                         .bidId(bidId)
                         .askId(askId)
-                        .tradePrice(bids.get(i).getPrice())
-                        .build();
-            } else {
-                newTrade = Trade.builder()
                         .symbol(symbol)
-                        .bidId(bidId)
-                        .askId(askId)
-                        .tradePrice(asks.get(i).getPrice())
+                        .tradePrice(fillPrice.setScale(2, RoundingMode.HALF_EVEN))
                         .build();
+                //create trade at mid price
+                trades.add(coolTrade);
             }
-            trades.add(newTrade);
         }
-        tradeRepository.saveAll(trades);
+        if (!trades.isEmpty()) {
+            tradeRepository.saveAll(trades);
+        }
         return trades;
     }
 
     public List<Trade> matchRealTimeTrades(List<TradeGroup> inboundGroups) {
+        List<Trade> trades = new ArrayList<>();
+
         Map<String, List<TradeGroup>> groupsBySymbol = inboundGroups.stream()
                 .collect(Collectors.groupingBy(TradeGroup::getSymbol));
         //change input to map from the orchestrator to prevent double group bys
-        List<List<QuotePrice>> quotes = groupsBySymbol.entrySet().stream()
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList())
+        List<List<QuotePrice>> quotesForAllSymbols = new ArrayList<>(groupsBySymbol.values())
                 .stream()
                 .flatMap(e -> e.stream().map(TradeGroup::getQuotePrices))
                 .collect(Collectors.toList());
 
-        List<Trade> trades = new ArrayList<>();
-
-        quotes.forEach(quotesForSymbol -> trades.addAll(matchTrades(quotesForSymbol)));
+        quotesForAllSymbols.forEach(quotesForSymbolList ->
+                trades.addAll(matchTrades(quotesForSymbolList))
+        );
 
         return trades;
     }

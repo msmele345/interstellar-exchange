@@ -1,6 +1,8 @@
 package com.mitchmele.interstellarexchange.services;
 
 import com.mitchmele.interstellarexchange.QuoteTest;
+import com.mitchmele.interstellarexchange.model.Ask;
+import com.mitchmele.interstellarexchange.model.Bid;
 import com.mitchmele.interstellarexchange.model.Trade;
 import com.mitchmele.interstellarexchange.model.TradeGroup;
 import com.mitchmele.interstellarexchange.repository.TradeRepository;
@@ -15,6 +17,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class TradeMatcherServiceTest extends QuoteTest {
@@ -25,27 +28,6 @@ class TradeMatcherServiceTest extends QuoteTest {
     @InjectMocks
     private TradeMatcherService tradeMatcherService;
 
-    @Test
-    @Disabled
-    public void matchTrades_returnsListOfTradeMatches_forSymbol() {
-        Trade trade1 = Trade.builder()
-                .symbol("OGC")
-                .bidId(22)
-                .askId(23)
-                .tradePrice(BigDecimal.valueOf(113.08))
-                .build();
-
-        Trade trade2 = Trade.builder()
-                .bidId(22)
-                .askId(22)
-                .symbol("OGC")
-                .tradePrice(BigDecimal.valueOf(113.03))
-                .build();
-
-        List<Trade> actual = tradeMatcherService.matchTrades(asList( inputBid5, inputAsk, inputAsk4, inputAsk5));
-        assertThat(actual).hasSize(2);
-        assertThat(actual).containsExactlyInAnyOrder(trade1, trade2);
-    }
 
     //matchRealtimeTrades:
     //breaks tradeGroups up by symbol
@@ -53,6 +35,89 @@ class TradeMatcherServiceTest extends QuoteTest {
     //sends list of quotes to match trades
     //match trades checks size of bids and asks and creates trades
     //trades are saved
+
+    //FILL ALGORITHM:
+    //diff .005
+    //ask - bid == diff
+    //if diff is within .005 bounds, then fill trade at mid price
+
+    @Test
+    public void matchTrades_matchesTrade_forSymbol_IfPricesWithinBounds() {
+        Bid inputBid = Bid.builder().id(113).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
+
+        Ask inputAsk = Ask.builder().id(119).symbol("ABC").askPrice(BigDecimal.valueOf(23.06)).build();
+
+        Trade trade1 = Trade.builder()
+                .symbol("ABC")
+                .bidId(113)
+                .askId(119)
+                .tradePrice(BigDecimal.valueOf(23.03))
+                .build();
+
+        List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputAsk));
+
+        verify(tradeRepository).saveAll(asList(trade1));
+        assertThat(actual).hasSize(1);
+        assertThat(actual).containsExactlyInAnyOrder(trade1);
+    }
+
+    @Test
+    public void matchTrades_doesNotCreateTradeIfBidAndAskPriceAreToFarApart() {
+        Bid inputBid = Bid.builder().id(73).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
+        Ask inputAsk = Ask.builder().id(14).symbol("ABC").askPrice(BigDecimal.valueOf(23.04)).build();
+
+        List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputAsk));
+
+        verifyNoInteractions(tradeRepository);
+        assertThat(actual).isEmpty();
+    }
+
+
+    @Test
+    public void matchTrades_returnsListOfMultipleMatches_ifTradeGroupHasSizesThatMatch() {
+        Bid inputBid = Bid.builder().id(73).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
+        Bid inputBid2 = Bid.builder().id(84).symbol("ABC").bidPrice(BigDecimal.valueOf(23.02)).build();
+        Ask inputAsk = Ask.builder().id(56).symbol("ABC").askPrice(BigDecimal.valueOf(23.04)).build();
+        Ask inputAsk2 = Ask.builder().id(90).symbol("ABC").askPrice(BigDecimal.valueOf(23.06)).build();
+
+        List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputBid2, inputAsk, inputAsk2));
+
+        Trade expectedTrade1 = Trade.builder()
+                .bidId(73)
+                .askId(56)
+                .symbol("ABC")
+                .tradePrice(BigDecimal.valueOf(23.02))
+                .build();
+        Trade expectedTrade2 = Trade.builder()
+                .bidId(84)
+                .askId(90)
+                .symbol("ABC")
+                .tradePrice(BigDecimal.valueOf(23.04))
+                .build();
+
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(asList(expectedTrade1, expectedTrade2));
+    }
+
+    @Test
+    @Disabled
+    public void matchTrades_returnsListOfMultipleMatches_ifTradeGroupContainsOnlySomeMatches() {
+        Bid inputBid = Bid.builder().id(73).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
+        Bid inputBid2 = Bid.builder().id(84).symbol("ABC").bidPrice(BigDecimal.valueOf(22.75)).build();
+        Ask inputAsk = Ask.builder().id(56).symbol("ABC").askPrice(BigDecimal.valueOf(23.20)).build();
+        Ask inputAsk2 = Ask.builder().id(90).symbol("ABC").askPrice(BigDecimal.valueOf(23.06)).build();
+
+        List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputBid2, inputAsk, inputAsk2));
+
+        Trade expectedTrade1 = Trade.builder()
+                .bidId(73)
+                .askId(90)
+                .symbol("ABC")
+                .tradePrice(BigDecimal.valueOf(23.03))
+                .build();
+
+        assertThat(actual).hasSize(1);
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(asList(expectedTrade1));
+    }
 
     @Test
     public void matchRealTimeTrades_shouldHandleMultipleBidsAndOffersWithDifferentSymbolsAndSize() {

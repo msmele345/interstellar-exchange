@@ -21,6 +21,7 @@ public class RealtimeTradeOrchestrator {
     private final QuotePreProcessorService quotePreProcessorService;
 
     //manual or scheduled job
+    //eventually move out into a ScheduledTradeOrchestrator that runs pre-processing/fetching on scheduled job
     public void orchestrate(String symbol) {
         //use matcher service to match trades
         //obtains current quotes from quotePreProcessorService and passes to trade service
@@ -30,8 +31,8 @@ public class RealtimeTradeOrchestrator {
 
     //listener passes here
     public void processRealTimeQuotes(List<QuotePrice> inboundQuotes) {
-        //organizes by symbol and price
-        //calls trade matcher service with quotes from jms
+        //organizes by symbol and prices (tradeGroups)
+        //calls matchRealTimeTrades in tradeMatcherService with quotes from jms
         Map<String, List<QuotePrice>> quotesForSymbol = inboundQuotes
                 .stream()
                 .collect(Collectors.groupingBy(QuotePrice::getSymbol));
