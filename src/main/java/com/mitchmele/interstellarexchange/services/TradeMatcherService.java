@@ -1,14 +1,11 @@
 package com.mitchmele.interstellarexchange.services;
-
 import com.mitchmele.interstellarexchange.model.*;
 import com.mitchmele.interstellarexchange.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,12 +16,13 @@ import java.util.stream.Collectors;
 public class TradeMatcherService {
 
     private final TradeRepository tradeRepository;
+    private final TradeExecutionHelper tradeExecutionHelper;
 
-    //feed result into this method to create trades and insert into trade repo.
-    //they should all be the same symbol here from the orchestrator or realtime service
+    //takes each group of quote prices for symbol
+    //gets trade candidates by calling check market with the bids and asks for one symbol
+    //passes eligible candidates from map to helper to execute list of trades
+    //save trades to repo
     public List<Trade> matchTrades(List<QuotePrice> quotes) {
-        List<Trade> trades = new ArrayList<>();
-
         List<QuotePrice> bids = quotes.stream()
                 .filter(q -> q.getClass().equals(Bid.class))
                 .collect(Collectors.toList());
@@ -35,42 +33,19 @@ public class TradeMatcherService {
 
         String symbol = quotes.get(0).getSymbol();
 
-        String smallestSize = marketDepthCheck(bids, asks);
+        Map<QuotePrice, QuotePrice> tradeCandidates = checkMarket(bids, asks);
 
-        long range = Long.min(bids.size(), asks.size());
-        //if bids or asks are zero, range will be zero and no trades will be made.
-        for (int i = 0; i < range; i++) {
-            Integer bidId = bids.get(i).getId();
-            Integer askId = asks.get(i).getId();
-            Trade newTrade;
+        List<Trade> trades = tradeExecutionHelper.executeTrades(tradeCandidates, symbol);
 
-            double askPrice = asks.get(i).getPrice().doubleValue();
-            double bidPrice = bids.get(i).getPrice().doubleValue();
-            double priceDiff = askPrice - bidPrice;
-
-            double threshold = askPrice * .005;
-
-            boolean isTradeMatch = priceDiff <= threshold;
-
-            if (isTradeMatch) {
-                BigDecimal fillPrice = BigDecimal.valueOf(bidPrice + priceDiff / 2);
-
-                Trade coolTrade = Trade.builder()
-                        .bidId(bidId)
-                        .askId(askId)
-                        .symbol(symbol)
-                        .tradePrice(fillPrice.setScale(2, RoundingMode.HALF_EVEN))
-                        .build();
-                //create trade at mid price
-                trades.add(coolTrade);
-            }
-        }
         if (!trades.isEmpty()) {
             tradeRepository.saveAll(trades);
         }
         return trades;
     }
 
+    //takes trade groups for different symbols with different bids and offers for each symbol
+    //each group has a symbol and a list of prices - may or may not be trade eligible
+    //breaks up into a list of bids+ offers for symbol and sends to matcher
     public List<Trade> matchRealTimeTrades(List<TradeGroup> inboundGroups) {
         List<Trade> trades = new ArrayList<>();
 
@@ -89,16 +64,20 @@ public class TradeMatcherService {
         return trades;
     }
 
-    protected String marketDepthCheck(List<QuotePrice> bids, List<QuotePrice> asks) {
-        String smallestDepth = null;
-        if (bids.size() == 0 && asks.size() == 0) return "ZERO";
-
-        if (bids.size() <= asks.size()) {
-            smallestDepth = "BID";
-        }
-        if (asks.size() < bids.size()) {
-            smallestDepth = "ASK";
-        }
-        return smallestDepth;
+    public Map<QuotePrice, QuotePrice> checkMarket(List<QuotePrice> bids, List<QuotePrice> asks) {
+        //feed this into matchTrades
+        //OR feed into new service/method that takes a map param and creates trades then saves to the repo
+        Map<QuotePrice, QuotePrice> result = new HashMap<>();
+        asks.forEach(ask -> {
+            double askPrice = ask.getPrice().doubleValue();
+            double threshold = askPrice - (askPrice * .005);
+            for (QuotePrice bid : bids) {
+                double bidPrice = bid.getPrice().doubleValue();
+                if (bidPrice >= threshold && !result.containsValue(ask) && !result.containsKey(bid)) {
+                    result.put(bid, ask);
+                }
+            }
+        });
+        return result;
     }
 }
