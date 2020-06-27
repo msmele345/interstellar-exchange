@@ -4,9 +4,8 @@ import com.mitchmele.interstellarexchange.model.QuotePrice;
 import com.mitchmele.interstellarexchange.model.Trade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +30,8 @@ public class TradeExecutionHelper {
 
     private BigDecimal getFillPrice(BigDecimal bidPrice, BigDecimal askPrice) {
         double diff = (askPrice.doubleValue() - bidPrice.doubleValue()) / 2;
-        return BigDecimal.valueOf(bidPrice.doubleValue() + diff);
+        BigDecimal fillprice = BigDecimal.valueOf(bidPrice.doubleValue() + diff);
+        fillprice.setScale(2, RoundingMode.HALF_DOWN);
+        return fillprice;
     }
 }

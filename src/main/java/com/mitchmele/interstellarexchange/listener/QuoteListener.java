@@ -6,9 +6,7 @@ import com.mitchmele.interstellarexchange.services.RealtimeTradeOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -34,7 +32,7 @@ public class QuoteListener implements MessageListener {
                 log.info("CONSUMED JMS INBOUND MESSAGE WITH PAYLOAD: " + ((ActiveMQTextMessage) message).getText());
                 newQuotes.add(quoteConverter.convert(quoteJson));
                 //remove size constraint
-                if (newQuotes.size() == 5) { //modify size matching constraint as needed
+                if (newQuotes.size() >= 6) { //modify size matching constraint as needed
                     realtimeTradeOrchestrator.processRealTimeQuotes(newQuotes);
                 }
             } catch (JMSException e) {
@@ -43,3 +41,9 @@ public class QuoteListener implements MessageListener {
         }
     }
 }
+/*
+TODO:
+1. QuoteListener - setup while loop to listen on this queue with .receive
+2. TradeMatcherService - create service that remove bid and ask from trade that was made from the repo (to prevent dupes from the schedule orchestrator)
+3. Extract ScheduledOrchestrator into its own pojo and work out business logic for scheduled market maker trades
+*/

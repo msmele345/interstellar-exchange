@@ -26,6 +26,9 @@ class RealtimeTradeOrchestratorTest extends QuoteTest {
     private TradeMatcherService tradeMatcherService;
 
     @Mock
+    private RealtimeMatcherService realtimeMatcherService;
+
+    @Mock
     private QuotePreProcessorService quotePreProcessorService;
 
     @InjectMocks
@@ -51,7 +54,7 @@ class RealtimeTradeOrchestratorTest extends QuoteTest {
     }
 
     @Test
-    public void processRealTimeQuotes_callsTradeMatcherServiceDirectly_withProvidedQuotesFromListener() {
+    public void processRealTimeQuotes_callsRealTimeMatcherService_withProcessedTradeGroups() {
 
         List<QuotePrice> incomingQuotes = asList(inputBid1, inputBid2, inputBid3, inputBid4, inputBid5, inputAsk, inputAsk2, inputAsk3, inputAsk4, inputAsk5);
 
@@ -67,7 +70,7 @@ class RealtimeTradeOrchestratorTest extends QuoteTest {
 
         ArgumentCaptor<List<TradeGroup>> captor = ArgumentCaptor.forClass(List.class);
 
-        verify(tradeMatcherService).matchRealTimeTrades(captor.capture());
+        verify(realtimeMatcherService).matchRealTimeTrades(captor.capture());
         assertThat(captor.getValue()).containsExactlyInAnyOrderElementsOf(expectedGroupToBeSentToService);
     }
 }
