@@ -32,18 +32,13 @@ class TradeMatcherServiceTest extends QuoteTest {
     private MarketCheckHelper marketCheckHelper;
 
     @Mock
+    private UpdateQuoteSystemService updateQuoteSystemService;
+
+    @Mock
     private TradeExecutionHelper tradeExecutionHelper;
 
     @InjectMocks
     private TradeMatcherService tradeMatcherService;
-
-
-    //matchRealtimeTrades:
-    //breaks tradeGroups up by symbol
-    //grabs quote prices for a symbol (list)
-    //sends list of quotes to match trades
-    //match trades checks size of bids and asks and creates trades
-    //trades are saved
 
     //FILL ALGORITHM:
     //diff .005
@@ -74,6 +69,7 @@ class TradeMatcherServiceTest extends QuoteTest {
         List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputAsk));
 
         verify(tradeRepository).saveAll(expectedTrades);
+        verify(updateQuoteSystemService).updateMarket(113, 119);
         verify(marketCheckHelper).checkMarket(asList(inputBid), asList(inputAsk));
         verify(tradeExecutionHelper).executeTrades(tradeCandidateMap, "ABC");
         assertThat(actual).hasSize(1);
@@ -125,10 +121,12 @@ class TradeMatcherServiceTest extends QuoteTest {
 
         List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputBid2, inputAsk, inputAsk2));
 
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expectedTrades);
         verify(tradeRepository).saveAll(expectedTrades);
         verify(marketCheckHelper).checkMarket(asList(inputBid, inputBid2), asList(inputAsk, inputAsk2));
         verify(tradeExecutionHelper).executeTrades(expectedMatches, "ABC");
-        assertThat(actual).containsExactlyInAnyOrderElementsOf(expectedTrades);
+        verify(updateQuoteSystemService).updateMarket(73, 56);
+        verify(updateQuoteSystemService).updateMarket(84, 90);
     }
 
     @Test

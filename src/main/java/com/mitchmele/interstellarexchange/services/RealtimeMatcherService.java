@@ -19,14 +19,10 @@ public class RealtimeMatcherService {
 
     private final TradeMatcherService tradeMatcherService;
 
-    //takes trade groups for different symbols with different bids and offers for each symbol
-    //each group has a symbol and a list of prices - may or may not be trade eligible
-    //breaks up into a list of bids+ offers for symbol and sends to matcher
-
     public void matchRealTimeTrades(List<TradeGroup> inboundGroups) {
         Map<String, List<TradeGroup>> groupsBySymbol = inboundGroups.stream()
                 .collect(Collectors.groupingBy(TradeGroup::getSymbol));
-        //change input to map from the orchestrator to prevent double group bys
+
         List<List<QuotePrice>> quotesForAllSymbols = new ArrayList<>(groupsBySymbol.values())
                 .stream()
                 .flatMap(e -> e.stream().map(TradeGroup::getQuotePrices))
@@ -36,5 +32,7 @@ public class RealtimeMatcherService {
                 tradeMatcherService.matchTrades(quotesForSymbolList)
         );
     }
-
 }
+//takes trade groups for different symbols with different bids and offers for each symbol
+//each group has a symbol and a list of prices - may or may not be trade eligible
+//breaks up into a list of bids+ offers for symbol and sends to matcher

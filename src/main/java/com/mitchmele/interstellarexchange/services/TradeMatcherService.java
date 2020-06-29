@@ -22,11 +22,8 @@ public class TradeMatcherService {
     private final TradeRepository tradeRepository;
     private final TradeExecutionHelper tradeExecutionHelper;
     private final MarketCheckHelper marketCheckHelper;
+    private final UpdateQuoteSystemService updateQuoteSystemService;
 
-    //takes each group of quote prices for symbol
-    //gets trade candidates by calling check market with the bids and asks for one symbol
-    //passes eligible candidates from map to helper to execute list of trades
-    //save trades to repo
     public List<Trade> matchTrades(List<QuotePrice> quotes) {
         List<Trade> trades = null;
 
@@ -48,8 +45,13 @@ public class TradeMatcherService {
 
         if (nonNull(trades) && !trades.isEmpty()) {
             log.info("TRADE MADE FOR SYMBOL: " + trades.get(0).getSymbol() + "AT PRICE: " + trades.get(0).getTradePrice());
+            trades.forEach(trade -> updateQuoteSystemService.updateMarket(trade.getBidId(), trade.getAskId()));
             tradeRepository.saveAll(trades);
         }
         return trades;
     }
 }
+//takes each group of quote prices for symbol
+//gets trade candidates by calling check market with the bids and asks for one symbol
+//passes eligible candidates from map to helper to execute list of trades
+//save trades to repo
