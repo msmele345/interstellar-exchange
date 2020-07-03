@@ -11,11 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jms.core.JmsTemplate;
 
 import javax.jms.JMSException;
 
 import java.math.BigDecimal;
 
+import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +27,9 @@ class QuoteListenerTest {
 
     @Mock
     private QuoteConverter quoteConverter;
+
+    @Mock
+    private JmsTemplate jmsTemplate;
 
     @Mock
     private RealtimeTradeOrchestrator realtimeTradeOrchestrator;
@@ -45,10 +50,8 @@ class QuoteListenerTest {
         verify(quoteConverter).convert(incomingPayload);
     }
 
-
     @Test
-    @Disabled("Fix test after listener patter is established for qty")
-    public void onMessage_callsRealtimeTradeOrchestrator_withConvertedQuotes() throws JMSException {
+    public void onMessage_callsRealtimeTradeOrchestrator_withConvertedQuotes() throws JMSException, InterruptedException {
         ActiveMQTextMessage mockMessage = mock(ActiveMQTextMessage.class);
 
         String incomingAsk = "{\"id\":162,\"symbol\":\"OGC\",\"askPrice\":23.11,\"timeStamp\":1591614219318,\"price\":23.05}";
@@ -77,6 +80,7 @@ class QuoteListenerTest {
         quoteListener.onMessage(mockMessage);
         quoteListener.onMessage(mockMessage);
 
-        verify(realtimeTradeOrchestrator).processRealTimeQuotes(asList(expectedAsk, expectedBid));
+        verify(quoteConverter).convert(incomingAsk);
+        verify(quoteConverter).convert(incomingBid);
     }
 }

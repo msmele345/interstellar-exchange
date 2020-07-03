@@ -4,6 +4,8 @@ import com.mitchmele.interstellarexchange.common.ErrorType;
 import com.mitchmele.interstellarexchange.common.ServiceLocation;
 import com.mitchmele.interstellarexchange.errorlogs.ErrorLogEntity;
 import com.mitchmele.interstellarexchange.errorlogs.ErrorLogService;
+import com.mitchmele.interstellarexchange.model.Ask;
+import com.mitchmele.interstellarexchange.model.Bid;
 import com.mitchmele.interstellarexchange.model.QuoteUpdateResult;
 import com.mitchmele.interstellarexchange.repository.AskRepository;
 import com.mitchmele.interstellarexchange.repository.BidRepository;
@@ -12,6 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -33,20 +38,41 @@ class UpdateQuoteSystemServiceTest {
 
     @Test
     void updateMarket_removesBidAndAskFromQuoteSystemAfterTrade() {
-        updateQuoteSystemService.updateMarket(13, 15);
-        verify(bidRepository).deleteById(13L);
-        verify(askRepository).deleteById(15L);
+        Ask askToBeDeleted = Ask.builder()
+                .id(900)
+                .askPrice(BigDecimal.valueOf(10.00))
+                .build();
+
+        Bid bidToBeDeleted = Bid.builder()
+                .id(901)
+                .bidPrice(BigDecimal.valueOf(11.00))
+                .build();
+
+        updateQuoteSystemService.updateMarket(bidToBeDeleted, askToBeDeleted);
+        verify(bidRepository).delete(bidToBeDeleted);
+        verify(askRepository).delete(askToBeDeleted);
     }
 
     @Test
     void updateMarket_returnsQuoteUpdateResultOfSuccessIfDeletesAreProcessed() {
-        doNothing().when(bidRepository).deleteById(anyLong());
-        doNothing().when(askRepository).deleteById(anyLong());
+        doNothing().when(bidRepository).delete(any());
+        doNothing().when(askRepository).delete(any());
 
         QuoteUpdateResult expectedResult = QuoteUpdateResult.builder()
                 .isSuccess(true)
                 .build();
-        QuoteUpdateResult actual = updateQuoteSystemService.updateMarket(13, 15);
+
+        Ask askToBeDeleted = Ask.builder()
+                .id(900)
+                .askPrice(BigDecimal.valueOf(10.00))
+                .build();
+
+        Bid bidToBeDeleted = Bid.builder()
+                .id(901)
+                .bidPrice(BigDecimal.valueOf(11.00))
+                .build();
+
+        QuoteUpdateResult actual = updateQuoteSystemService.updateMarket(bidToBeDeleted, askToBeDeleted);
 
         assertThat(actual).isEqualTo(expectedResult);
     }
@@ -64,9 +90,19 @@ class UpdateQuoteSystemServiceTest {
                 .errorType(ErrorType.PROCESSING.value)
                 .build();
 
-        doThrow(new RuntimeException("error with bid")).when(bidRepository).deleteById(anyLong());
+        doThrow(new RuntimeException("error with bid")).when(bidRepository).delete(any());
 
-        QuoteUpdateResult actual = updateQuoteSystemService.updateMarket(13, 16);
+        Ask askToBeDeleted = Ask.builder()
+                .id(900)
+                .askPrice(BigDecimal.valueOf(10.00))
+                .build();
+
+        Bid bidToBeDeleted = Bid.builder()
+                .id(901)
+                .bidPrice(BigDecimal.valueOf(11.00))
+                .build();
+
+        QuoteUpdateResult actual = updateQuoteSystemService.updateMarket(bidToBeDeleted, askToBeDeleted);
 
         assertThat(actual).isEqualTo(expectedResult);
         verify(errorLogService).saveError(expectedErrorEntity);

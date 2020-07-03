@@ -69,7 +69,7 @@ class TradeMatcherServiceTest extends QuoteTest {
         List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputAsk));
 
         verify(tradeRepository).saveAll(expectedTrades);
-        verify(updateQuoteSystemService).updateMarket(113, 119);
+        verify(updateQuoteSystemService).updateMarket(inputBid, inputAsk);
         verify(marketCheckHelper).checkMarket(asList(inputBid), asList(inputAsk));
         verify(tradeExecutionHelper).executeTrades(tradeCandidateMap, "ABC");
         assertThat(actual).hasSize(1);
@@ -125,8 +125,8 @@ class TradeMatcherServiceTest extends QuoteTest {
         verify(tradeRepository).saveAll(expectedTrades);
         verify(marketCheckHelper).checkMarket(asList(inputBid, inputBid2), asList(inputAsk, inputAsk2));
         verify(tradeExecutionHelper).executeTrades(expectedMatches, "ABC");
-        verify(updateQuoteSystemService).updateMarket(73, 56);
-        verify(updateQuoteSystemService).updateMarket(84, 90);
+        verify(updateQuoteSystemService).updateMarket(inputBid, inputAsk);
+        verify(updateQuoteSystemService).updateMarket(inputBid2, inputAsk2);
     }
 
     @Test

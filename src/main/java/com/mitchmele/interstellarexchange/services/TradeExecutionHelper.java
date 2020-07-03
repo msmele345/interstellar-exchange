@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class TradeExecutionHelper {
 
     public List<Trade> executeTrades(Map<QuotePrice, QuotePrice> bidsAndOffers, String symbol) {
-        return bidsAndOffers.entrySet().stream()
+         return bidsAndOffers.entrySet().stream()
                 .map(priceEntry ->
                         Trade.builder()
                                 .symbol(symbol)
@@ -27,7 +27,7 @@ public class TradeExecutionHelper {
                                 .build()
                 ).collect(Collectors.toList());
     }
-
+    //executes at the midpoint between bid and ask if trade eligable
     private BigDecimal getFillPrice(BigDecimal bidPrice, BigDecimal askPrice) {
         double diff = (askPrice.doubleValue() - bidPrice.doubleValue()) / 2;
         BigDecimal fillprice = BigDecimal.valueOf(bidPrice.doubleValue() + diff);

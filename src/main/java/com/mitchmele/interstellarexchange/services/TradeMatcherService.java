@@ -1,13 +1,13 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.*;
+import com.mitchmele.interstellarexchange.model.Ask;
+import com.mitchmele.interstellarexchange.model.Bid;
+import com.mitchmele.interstellarexchange.model.QuotePrice;
+import com.mitchmele.interstellarexchange.model.Trade;
 import com.mitchmele.interstellarexchange.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,8 +44,9 @@ public class TradeMatcherService {
         }
 
         if (nonNull(trades) && !trades.isEmpty()) {
-            log.info("TRADE MADE FOR SYMBOL: " + trades.get(0).getSymbol() + "AT PRICE: " + trades.get(0).getTradePrice());
-            trades.forEach(trade -> updateQuoteSystemService.updateMarket(trade.getBidId(), trade.getAskId()));
+            log.info("TRADE MADE FOR SYMBOL: " + trades.get(0).getSymbol() + " AT PRICE: " + trades.get(0).getTradePrice());
+            //TODO find way to pass bid and ask of made trade to updateSystem
+//            trades.forEach(trade -> updateQuoteSystemService.updateMarket(trade.getBidId(), trade.getAskId()));
             tradeRepository.saveAll(trades);
         }
         return trades;

@@ -25,7 +25,7 @@ public class ErrorLogEntity {
     @Column(name = "ERROR_TYPE")
     private String errorType;
 
-    @Column(name = "ERROR_MESSAGE")
+    @Column(name = "ERROR_MESSAGE", length = 1000)
     private String errorMessage;
 
     @Column(name = "SERVICE_LOCATION")

@@ -4,6 +4,8 @@ import com.mitchmele.interstellarexchange.common.ErrorType;
 import com.mitchmele.interstellarexchange.common.ServiceLocation;
 import com.mitchmele.interstellarexchange.errorlogs.ErrorLogEntity;
 import com.mitchmele.interstellarexchange.errorlogs.ErrorLogService;
+import com.mitchmele.interstellarexchange.model.Ask;
+import com.mitchmele.interstellarexchange.model.Bid;
 import com.mitchmele.interstellarexchange.model.QuoteUpdateResult;
 import com.mitchmele.interstellarexchange.repository.AskRepository;
 import com.mitchmele.interstellarexchange.repository.BidRepository;
@@ -20,12 +22,12 @@ public class UpdateQuoteSystemService {
     private final AskRepository askRepository;
     private final ErrorLogService errorLogService;
 
-    public QuoteUpdateResult updateMarket(Integer bidId, Integer askId) {
+    public QuoteUpdateResult updateMarket(Bid bidToBeDeleted, Ask askToBeDeleted) {
 
         try {
-            bidRepository.deleteById(Long.valueOf(bidId));
-            askRepository.deleteById(Long.valueOf(askId));
-            log.info("SUCCESSFULLY DELETED BID AND OFFER FOR TRADE. BID: " + bidId + " ," + "ASK: " + askId);
+            bidRepository.delete(bidToBeDeleted);
+            askRepository.delete(askToBeDeleted);
+            log.info("SUCCESSFULLY DELETED BID AND OFFER FOR TRADE. BID: " + bidToBeDeleted.toString() + " ," + "ASK: " + askToBeDeleted.toString());
 
             return QuoteUpdateResult.builder().isSuccess(true).build();
         } catch (Exception e) {

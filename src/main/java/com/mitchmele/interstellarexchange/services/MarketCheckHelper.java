@@ -16,8 +16,8 @@ import java.util.Map;
 public class MarketCheckHelper {
 
     public Map<QuotePrice, QuotePrice> checkMarket(List<QuotePrice> bids, List<QuotePrice> asks) {
-        //feed this into matchTrades
-        //OR feed into new service/method that takes a map param and creates trades then saves to the repo
+        //check bid and ask price for symbol and check if a trade is possible using threshold
+        //passes trade eligible map back to tradeMatcher service
         Map<QuotePrice, QuotePrice> result = new HashMap<>();
         asks.forEach(ask -> {
             double askPrice = ask.getPrice().doubleValue();

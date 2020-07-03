@@ -37,6 +37,11 @@ public class LoaderConfig {
     }
 
     @Bean
+    Destination quote2Destination() {
+        return new ActiveMQQueue("stocks2");
+    }
+
+    @Bean
     Destination errorsDestination() { return new ActiveMQQueue(errors); }
 
     //connection factory
