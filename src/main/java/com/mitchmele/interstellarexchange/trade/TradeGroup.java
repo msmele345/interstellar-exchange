@@ -1,11 +1,11 @@
-package com.mitchmele.interstellarexchange.model;
+package com.mitchmele.interstellarexchange.trade;
 
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Data

@@ -1,6 +1,6 @@
-package com.mitchmele.interstellarexchange.repository;
+package com.mitchmele.interstellarexchange.ask.repository;
 
-import com.mitchmele.interstellarexchange.model.Ask;
+import com.mitchmele.interstellarexchange.ask.Ask;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

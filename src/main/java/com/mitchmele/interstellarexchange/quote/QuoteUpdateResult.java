@@ -1,4 +1,4 @@
-package com.mitchmele.interstellarexchange.model;
+package com.mitchmele.interstellarexchange.quote;
 
 
 import lombok.AllArgsConstructor;

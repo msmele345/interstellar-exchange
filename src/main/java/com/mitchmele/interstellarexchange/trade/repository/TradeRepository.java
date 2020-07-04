@@ -1,6 +1,6 @@
-package com.mitchmele.interstellarexchange.repository;
+package com.mitchmele.interstellarexchange.trade.repository;
 
-import com.mitchmele.interstellarexchange.model.Trade;
+import com.mitchmele.interstellarexchange.trade.Trade;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

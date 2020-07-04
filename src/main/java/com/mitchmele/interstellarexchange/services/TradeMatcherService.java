@@ -1,17 +1,16 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import com.mitchmele.interstellarexchange.model.Trade;
-import com.mitchmele.interstellarexchange.repository.TradeRepository;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.trade.Trade;
+import com.mitchmele.interstellarexchange.trade.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import static java.util.Objects.nonNull;
 
 @Slf4j
@@ -44,15 +43,10 @@ public class TradeMatcherService {
         }
 
         if (nonNull(trades) && !trades.isEmpty()) {
-            log.info("TRADE MADE FOR SYMBOL: " + trades.get(0).getSymbol() + " AT PRICE: " + trades.get(0).getTradePrice());
-            //TODO find way to pass bid and ask of made trade to updateSystem
-//            trades.forEach(trade -> updateQuoteSystemService.updateMarket(trade.getBidId(), trade.getAskId()));
+            log.info(trades.size() +  " TRADE(S) MADE FOR SYMBOL: " + trades.get(0).getSymbol());
             tradeRepository.saveAll(trades);
+            updateQuoteSystemService.updateMarket(quotes, trades);
         }
         return trades;
     }
 }
-//takes each group of quote prices for symbol
-//gets trade candidates by calling check market with the bids and asks for one symbol
-//passes eligible candidates from map to helper to execute list of trades
-//save trades to repo

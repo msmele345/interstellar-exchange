@@ -1,6 +1,6 @@
 package com.mitchmele.interstellarexchange.listener;
 
-import com.mitchmele.interstellarexchange.model.QuotePrice;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
 import com.mitchmele.interstellarexchange.services.QuoteConverter;
 import com.mitchmele.interstellarexchange.services.RealtimeTradeOrchestrator;
 import lombok.RequiredArgsConstructor;
@@ -9,16 +9,15 @@ import org.apache.activemq.command.ActiveMQTextMessage;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import java.util.ArrayList;
 import java.util.List;
 
+@EnableScheduling
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@EnableScheduling
 public class QuoteListener implements MessageListener {
 
     private final QuoteConverter quoteConverter;
@@ -49,6 +48,6 @@ public class QuoteListener implements MessageListener {
 }
 /*
 TODO:
-1. Fix updateQuoteSystem tests in trade matcher
-2. Extract ScheduledOrchestrator into its own pojo and work out business logic for scheduled market maker trades
+1. Extract ScheduledOrchestrator into its own pojo and work out business logic for scheduled market maker trades
+2. Setup Retry and DLQ for listener
 */

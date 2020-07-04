@@ -1,7 +1,7 @@
 package com.mitchmele.interstellarexchange;
 
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
 
 import java.math.BigDecimal;
 

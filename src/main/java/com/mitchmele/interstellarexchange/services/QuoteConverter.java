@@ -1,13 +1,10 @@
 package com.mitchmele.interstellarexchange.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;

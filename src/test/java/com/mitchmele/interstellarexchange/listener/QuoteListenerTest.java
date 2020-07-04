@@ -1,11 +1,10 @@
 package com.mitchmele.interstellarexchange.listener;
 
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
 import com.mitchmele.interstellarexchange.services.QuoteConverter;
 import com.mitchmele.interstellarexchange.services.RealtimeTradeOrchestrator;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +17,6 @@ import javax.jms.JMSException;
 import java.math.BigDecimal;
 
 import static java.lang.Thread.sleep;
-import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
 
 

@@ -1,9 +1,9 @@
 package com.mitchmele.interstellarexchange.services;
 
 import com.mitchmele.interstellarexchange.QuoteTest;
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.TradeGroup;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.trade.TradeGroup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

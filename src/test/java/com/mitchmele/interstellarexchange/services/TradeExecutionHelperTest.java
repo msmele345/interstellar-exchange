@@ -1,9 +1,9 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import com.mitchmele.interstellarexchange.model.Trade;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.trade.Trade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class TradeExecutionHelperTest {

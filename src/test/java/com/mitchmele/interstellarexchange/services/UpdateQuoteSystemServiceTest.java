@@ -4,21 +4,20 @@ import com.mitchmele.interstellarexchange.common.ErrorType;
 import com.mitchmele.interstellarexchange.common.ServiceLocation;
 import com.mitchmele.interstellarexchange.errorlogs.ErrorLogEntity;
 import com.mitchmele.interstellarexchange.errorlogs.ErrorLogService;
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.QuoteUpdateResult;
-import com.mitchmele.interstellarexchange.repository.AskRepository;
-import com.mitchmele.interstellarexchange.repository.BidRepository;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.trade.Trade;
+import com.mitchmele.interstellarexchange.ask.repository.AskRepository;
+import com.mitchmele.interstellarexchange.bid.repository.BidRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.math.BigDecimal;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.List;
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +30,9 @@ class UpdateQuoteSystemServiceTest {
     private AskRepository askRepository;
 
     @Mock
+    private UsedQuoteHelper usedQuoteHelper;
+
+    @Mock
     private ErrorLogService errorLogService;
 
     @InjectMocks
@@ -38,73 +40,64 @@ class UpdateQuoteSystemServiceTest {
 
     @Test
     void updateMarket_removesBidAndAskFromQuoteSystemAfterTrade() {
-        Ask askToBeDeleted = Ask.builder()
-                .id(900)
-                .askPrice(BigDecimal.valueOf(10.00))
+        Bid inputBid = Bid.builder().id(73).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
+        Bid inputBid2 = Bid.builder().id(84).symbol("ABC").bidPrice(BigDecimal.valueOf(22.75)).build();
+        Ask inputAsk = Ask.builder().id(56).symbol("ABC").askPrice(BigDecimal.valueOf(23.20)).build();
+        Ask inputAsk2 = Ask.builder().id(90).symbol("ABC").askPrice(BigDecimal.valueOf(23.06)).build();
+
+        List<QuotePrice> allQuotes = asList(inputBid, inputBid2, inputAsk, inputAsk2);
+
+        Trade trade = Trade.builder()
+                .bidId(73)
+                .askId(90)
+                .symbol("ABC")
+                .tradePrice(BigDecimal.valueOf(23.03))
                 .build();
 
-        Bid bidToBeDeleted = Bid.builder()
-                .id(901)
-                .bidPrice(BigDecimal.valueOf(11.00))
-                .build();
+        List<Trade> actualTrades = asList(trade);
 
-        updateQuoteSystemService.updateMarket(bidToBeDeleted, askToBeDeleted);
-        verify(bidRepository).delete(bidToBeDeleted);
-        verify(askRepository).delete(askToBeDeleted);
+        List<QuotePrice> bidsAndAsksUsedInTrades = asList(inputBid, inputAsk2);
+        when(usedQuoteHelper.fetchUsedQuotes(anyList(), anyList())).thenReturn(bidsAndAsksUsedInTrades);
+
+        updateQuoteSystemService.updateMarket(allQuotes, actualTrades);
+
+        verify(usedQuoteHelper).fetchUsedQuotes(allQuotes, actualTrades);
+        verify(bidRepository).delete(inputBid);
+        verify(askRepository).delete(inputAsk2);
     }
 
     @Test
-    void updateMarket_returnsQuoteUpdateResultOfSuccessIfDeletesAreProcessed() {
-        doNothing().when(bidRepository).delete(any());
-        doNothing().when(askRepository).delete(any());
+    void updateMarket_savesErrorLogEntityWithExceptionMetadataIfErrorOccurs() {
 
-        QuoteUpdateResult expectedResult = QuoteUpdateResult.builder()
-                .isSuccess(true)
+        Bid inputBid = Bid.builder().id(73).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
+        Bid inputBid2 = Bid.builder().id(84).symbol("ABC").bidPrice(BigDecimal.valueOf(22.75)).build();
+        Ask inputAsk = Ask.builder().id(56).symbol("ABC").askPrice(BigDecimal.valueOf(23.20)).build();
+        Ask inputAsk2 = Ask.builder().id(90).symbol("ABC").askPrice(BigDecimal.valueOf(23.06)).build();
+
+        List<QuotePrice> allQuotes = asList(inputBid, inputBid2, inputAsk, inputAsk2);
+
+        Trade trade = Trade.builder()
+                .bidId(73)
+                .askId(90)
+                .symbol("ABC")
+                .tradePrice(BigDecimal.valueOf(23.03))
                 .build();
 
-        Ask askToBeDeleted = Ask.builder()
-                .id(900)
-                .askPrice(BigDecimal.valueOf(10.00))
-                .build();
+        List<Trade> actualTrades = asList(trade);
 
-        Bid bidToBeDeleted = Bid.builder()
-                .id(901)
-                .bidPrice(BigDecimal.valueOf(11.00))
-                .build();
+        List<QuotePrice> bidsAndAsksUsedInTrades = asList(inputBid, inputAsk2);
+        when(usedQuoteHelper.fetchUsedQuotes(anyList(), anyList())).thenReturn(bidsAndAsksUsedInTrades);
 
-        QuoteUpdateResult actual = updateQuoteSystemService.updateMarket(bidToBeDeleted, askToBeDeleted);
-
-        assertThat(actual).isEqualTo(expectedResult);
-    }
-
-    @Test
-    void updateMarket_throwsIllegalArgumentExceptionIfBidOrAskIsNull() {
-        QuoteUpdateResult expectedResult = QuoteUpdateResult.builder()
-                .isSuccess(false)
-                .lazyMessage("error with bid")
-                .build();
+        doThrow(new RuntimeException("error")).when(bidRepository).delete(any());
 
         ErrorLogEntity expectedErrorEntity = ErrorLogEntity.builder()
                 .serviceLocation(ServiceLocation.DATABASE.value)
-                .errorMessage("error with bid")
+                .errorMessage("error")
                 .errorType(ErrorType.PROCESSING.value)
                 .build();
 
-        doThrow(new RuntimeException("error with bid")).when(bidRepository).delete(any());
+        updateQuoteSystemService.updateMarket(allQuotes, actualTrades);
 
-        Ask askToBeDeleted = Ask.builder()
-                .id(900)
-                .askPrice(BigDecimal.valueOf(10.00))
-                .build();
-
-        Bid bidToBeDeleted = Bid.builder()
-                .id(901)
-                .bidPrice(BigDecimal.valueOf(11.00))
-                .build();
-
-        QuoteUpdateResult actual = updateQuoteSystemService.updateMarket(bidToBeDeleted, askToBeDeleted);
-
-        assertThat(actual).isEqualTo(expectedResult);
         verify(errorLogService).saveError(expectedErrorEntity);
     }
 }

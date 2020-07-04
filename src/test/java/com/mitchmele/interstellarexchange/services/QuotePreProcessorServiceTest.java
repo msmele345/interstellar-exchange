@@ -1,10 +1,10 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import com.mitchmele.interstellarexchange.repository.AskRepository;
-import com.mitchmele.interstellarexchange.repository.BidRepository;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.ask.repository.AskRepository;
+import com.mitchmele.interstellarexchange.bid.repository.BidRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

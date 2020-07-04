@@ -1,12 +1,10 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import com.mitchmele.interstellarexchange.model.Trade;
-import com.mitchmele.interstellarexchange.model.TradeGroup;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.trade.TradeGroup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

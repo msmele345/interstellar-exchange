@@ -1,4 +1,4 @@
-package com.mitchmele.interstellarexchange.model;
+package com.mitchmele.interstellarexchange.trade;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

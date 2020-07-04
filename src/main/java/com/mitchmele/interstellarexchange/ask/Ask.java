@@ -1,6 +1,7 @@
-package com.mitchmele.interstellarexchange.model;
+package com.mitchmele.interstellarexchange.ask;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,12 +15,12 @@ import java.util.Date;
 
 @Data
 @Builder
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@AllArgsConstructor
 @Entity
-@Table(name = "BID")
-public class Bid implements QuotePrice, Serializable {
+@Table(name = "ASK")
+public class Ask implements QuotePrice, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +29,8 @@ public class Bid implements QuotePrice, Serializable {
 
     private String symbol;
 
-    @Column(name = "Bidprice")
-    private BigDecimal bidPrice;
+    @Column(name = "Askprice")
+    private BigDecimal askPrice;
 
     @Column(name = "CREATED_TS", updatable = false)
     @CreationTimestamp
@@ -44,6 +45,7 @@ public class Bid implements QuotePrice, Serializable {
     }
 
     public BigDecimal getPrice() {
-        return bidPrice;
+        return askPrice;
     }
 }
+

@@ -1,7 +1,7 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import com.mitchmele.interstellarexchange.model.Trade;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.trade.Trade;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
@@ -27,7 +27,7 @@ public class TradeExecutionHelper {
                                 .build()
                 ).collect(Collectors.toList());
     }
-    //executes at the midpoint between bid and ask if trade eligable
+    //executes at the midpoint between bid and ask if trade eligible
     private BigDecimal getFillPrice(BigDecimal bidPrice, BigDecimal askPrice) {
         double diff = (askPrice.doubleValue() - bidPrice.doubleValue()) / 2;
         BigDecimal fillprice = BigDecimal.valueOf(bidPrice.doubleValue() + diff);

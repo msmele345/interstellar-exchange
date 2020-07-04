@@ -1,7 +1,6 @@
 package com.mitchmele.interstellarexchange.services;
 
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import lombok.AllArgsConstructor;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

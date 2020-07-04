@@ -1,11 +1,11 @@
 package com.mitchmele.interstellarexchange.services;
 
 import com.mitchmele.interstellarexchange.QuoteTest;
-import com.mitchmele.interstellarexchange.model.Ask;
-import com.mitchmele.interstellarexchange.model.Bid;
-import com.mitchmele.interstellarexchange.model.QuotePrice;
-import com.mitchmele.interstellarexchange.model.Trade;
-import com.mitchmele.interstellarexchange.repository.TradeRepository;
+import com.mitchmele.interstellarexchange.ask.Ask;
+import com.mitchmele.interstellarexchange.bid.Bid;
+import com.mitchmele.interstellarexchange.quote.QuotePrice;
+import com.mitchmele.interstellarexchange.trade.Trade;
+import com.mitchmele.interstellarexchange.trade.repository.TradeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,7 +48,6 @@ class TradeMatcherServiceTest extends QuoteTest {
     @Test
     public void matchTrades_matchesTrade_forSymbol_IfPricesWithinBounds() {
         Bid inputBid = Bid.builder().id(113).symbol("ABC").bidPrice(BigDecimal.valueOf(23.00)).build();
-
         Ask inputAsk = Ask.builder().id(119).symbol("ABC").askPrice(BigDecimal.valueOf(23.06)).build();
 
         Trade trade1 = Trade.builder()
@@ -69,7 +68,7 @@ class TradeMatcherServiceTest extends QuoteTest {
         List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputAsk));
 
         verify(tradeRepository).saveAll(expectedTrades);
-        verify(updateQuoteSystemService).updateMarket(inputBid, inputAsk);
+        verify(updateQuoteSystemService).updateMarket(asList(inputBid, inputAsk), asList(trade1));
         verify(marketCheckHelper).checkMarket(asList(inputBid), asList(inputAsk));
         verify(tradeExecutionHelper).executeTrades(tradeCandidateMap, "ABC");
         assertThat(actual).hasSize(1);
@@ -125,8 +124,7 @@ class TradeMatcherServiceTest extends QuoteTest {
         verify(tradeRepository).saveAll(expectedTrades);
         verify(marketCheckHelper).checkMarket(asList(inputBid, inputBid2), asList(inputAsk, inputAsk2));
         verify(tradeExecutionHelper).executeTrades(expectedMatches, "ABC");
-        verify(updateQuoteSystemService).updateMarket(inputBid, inputAsk);
-        verify(updateQuoteSystemService).updateMarket(inputBid2, inputAsk2);
+        verify(updateQuoteSystemService).updateMarket(asList(inputBid, inputBid2, inputAsk, inputAsk2), expectedTrades);
     }
 
     @Test
@@ -169,6 +167,7 @@ class TradeMatcherServiceTest extends QuoteTest {
         List<Trade> actual = tradeMatcherService.matchTrades(asList(inputBid, inputBid2, inputAsk, inputAsk2));
 
         verify(tradeRepository).saveAll(expectedTrades);
+        verify(updateQuoteSystemService).updateMarket(asList(inputBid, inputBid2, inputAsk, inputAsk2), asList(expectedTrade1));
         assertThat(actual).hasSize(1);
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expectedTrades);
     }

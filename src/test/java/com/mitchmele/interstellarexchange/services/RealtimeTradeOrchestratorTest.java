@@ -1,7 +1,8 @@
 package com.mitchmele.interstellarexchange.services;
 
 import com.mitchmele.interstellarexchange.QuoteTest;
-import com.mitchmele.interstellarexchange.model.*;
+import com.mitchmele.interstellarexchange.quote.*;
+import com.mitchmele.interstellarexchange.trade.TradeGroup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -9,12 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
