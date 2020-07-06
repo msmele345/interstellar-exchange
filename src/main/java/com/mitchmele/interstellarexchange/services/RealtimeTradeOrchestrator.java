@@ -15,32 +15,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RealtimeTradeOrchestrator {
 
-    private final TradeMatcherService tradeMatcherService;
     private final RealtimeMatcherService realtimeMatcherService;
-    private final QuotePreProcessorService quotePreProcessorService;
-
-    //manual or scheduled job
-    //eventually move out into a ScheduledTradeOrchestrator that runs pre-processing/fetching on scheduled job
-    public void orchestrate(String symbol) {
-        //use matcher service to match trades
-        //obtains current quotes from quotePreProcessorService and passes to trade service
-        List<QuotePrice> quotesForSymbol = quotePreProcessorService.fetchQuotesForSymbol(symbol);
-        tradeMatcherService.matchTrades(quotesForSymbol);
-    }
 
     //listener passes here
     public void processRealTimeQuotes(List<QuotePrice> inboundQuotes) {
         //organizes by symbol and prices (tradeGroups)
         //calls matchRealTimeTrades in tradeMatcherService with quotes from jms
-        Map<String, List<QuotePrice>> quotesForSymbol = inboundQuotes
-                .stream()
-                .collect(Collectors.groupingBy(QuotePrice::getSymbol));
-
-        List<TradeGroup> tradeGroups = quotesForSymbol.entrySet().stream()
-                .map(symbol ->
+        List<TradeGroup> tradeGroups = inboundQuotes.stream()
+                .collect(Collectors.groupingBy(QuotePrice::getSymbol))
+                .entrySet().stream()
+                .map(quote ->
                         TradeGroup.builder()
-                                .symbol(symbol.getKey())
-                                .quotePrices(symbol.getValue()) //list of quotes
+                                .symbol(quote.getKey())
+                                .quotePrices(quote.getValue())
                                 .build()
                 ).collect(Collectors.toList());
 
