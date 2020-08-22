@@ -26,7 +26,6 @@
         which bid/ask quotes are trade eligible. Executes eligible trades
     - Saves any trades made to trade repo
     - Updates bid/ask repos by deleting any bid/asks used in trade to prevent dupe trades
-    - Algorithms
 
 
 ### MISC
