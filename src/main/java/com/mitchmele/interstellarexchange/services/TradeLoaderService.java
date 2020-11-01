@@ -3,12 +3,13 @@ package com.mitchmele.interstellarexchange.services;
 import com.mitchmele.interstellarexchange.common.InvalidDateRequestException;
 import com.mitchmele.interstellarexchange.helpers.DateHelper;
 import com.mitchmele.interstellarexchange.helpers.TradesForDatesRequest;
+import com.mitchmele.interstellarexchange.loaderauditlog.LoaderAuditLog;
+import com.mitchmele.interstellarexchange.loaderauditlog.repository.LoaderAuditLogRepository;
 import com.mitchmele.interstellarexchange.trade.Trade;
 import com.mitchmele.interstellarexchange.trade.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class TradeLoaderService {
 
     private final TradeRepository tradeRepository;
     private final DateHelper dateHelper;
+    private final LoaderAuditLogRepository loaderAuditLogRepository;
 
     public List<Trade> fetchTradesForSymbol(String symbol) {
         return tradeRepository.findAllBySymbol(symbol)
@@ -25,7 +27,9 @@ public class TradeLoaderService {
     }
 
     public List<Trade> fetchTrades() {
-        return tradeRepository.findAll();
+        List<Trade> allTrades = tradeRepository.findAll();
+        loaderAuditLogRepository.save(LoaderAuditLog.builder().loadCount(allTrades.size()).build());
+        return allTrades;
     }
 
     public Trade fetchTradeById(Integer id) {

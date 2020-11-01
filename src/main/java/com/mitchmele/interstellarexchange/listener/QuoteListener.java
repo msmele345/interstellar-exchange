@@ -38,7 +38,7 @@ public class QuoteListener implements MessageListener {
         }
     }
 
-    @Scheduled(fixedDelay = 10000L) //tweak to 30 seconds to allow for all quotes to go through trade flow?
+    @Scheduled(fixedDelay = 30000L) //tweak to 30 seconds to allow for all quotes to go through trade flow?
     public void processQuotes() {
         if (!newQuotes.isEmpty()) {
             realtimeTradeOrchestrator.processRealTimeQuotes(newQuotes);
@@ -46,8 +46,3 @@ public class QuoteListener implements MessageListener {
         }
     }
 }
-/*
-TODO:
-1. Extract ScheduledOrchestrator into its own pojo and work out business logic for scheduled market maker trades
-2. Setup Retry and DLQ for listener
-*/

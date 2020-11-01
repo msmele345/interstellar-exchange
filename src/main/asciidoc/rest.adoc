@@ -1,0 +1,60 @@
+= RESTful APIs
+:doctype: docbook
+:icons: font
+:source-highlighter: prettify
+:toc: left
+:toclevels: 4
+:apiversion: v1
+
+[[overview-rest]]
+== What is a RESTful API?
+
+[[overview-http-verbs]]
+=== HTTP verbs
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource
+
+| `POST`
+| Used to create a new resource
+|===
+
+[[overview-http-status-codes]]
+=== HTTP status codes
+|===
+| Status code | Usage
+
+| `200 OK`
+| Standard response for successful HTTP requests.
+The actual response will depend on the request method used.
+In a GET request, the response will contain an entity corresponding to the requested resource.
+In a POST request, the response will contain an entity describing or containing the result of the action.
+
+| `201 Created`
+| The request has been fulfilled and resulted in a new resource being created.
+
+| `206 Partial Content`
+| The server has processed the request but an error occurred that resulted in part
+part of the request being fulfilled.  The server will return as much data as is currently available but some data may not be available at this time.
+
+| `400 Bad Request`
+| The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
+
+| `401 Unauthorized`
+| The request requires user authentication. The Header contains a key value pair of
+`Authorization: Bearer <token>`.
+
+| `403 Forbidden`
+| The server understood the request, but is refusing to fulfill it. Authorization will not help and the request SHOULD NOT be repeated.
+
+| `404 Not Found`
+| The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible.
+
+| `500 Internal Service Error`
+| The server encountered an unexpected condition which prevented it from fulfilling the request.
+
+| `503 Service Unavailable`
+| The server is currently unable to handle the request due to a temporary overloading or maintenance of the server. The implication is that this is a temporary condition which will be alleviated after some delay. If known, the length of the delay MAY be indicated in a Retry-After header. If no Retry-After is given, the client SHOULD handle the response as it would for a 500 response.
+|===

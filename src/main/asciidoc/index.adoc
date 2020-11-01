@@ -1,0 +1,38 @@
+= Trades API
+:toc: left
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toclevels: 2
+:sectlinks:
+:apiversion: v1
+
+
+= API Overview
+
+== Trades API
+Collection of CRUD API endpoints used to view trades registered in the application/exchange.
+
+=== Get Trade By Id
+Path Parameters
+include::{snippets}/get-trade-by-id/path-parameters.adoc[]
+
+==== Example Request
+include::{snippets}/get-trade-by-id/http-request.adoc[]
+
+==== Example Response
+include::{snippets}/get-trade-by-id/http-response.adoc[]
+
+
+=== Get All Trades
+
+==== Example Request
+include::{snippets}/get-trades/http-request.adoc[]
+
+==== Example Response
+include::{snippets}/get-trades/http-response.adoc[]
+
+
+- For more information on REST, checkout: link:rest.html[RESTful APIs]
+
+

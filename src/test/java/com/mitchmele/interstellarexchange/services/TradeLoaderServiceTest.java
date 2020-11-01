@@ -3,6 +3,8 @@ package com.mitchmele.interstellarexchange.services;
 import com.mitchmele.interstellarexchange.common.InvalidDateRequestException;
 import com.mitchmele.interstellarexchange.helpers.DateHelper;
 import com.mitchmele.interstellarexchange.helpers.TradesForDatesRequest;
+import com.mitchmele.interstellarexchange.loaderauditlog.LoaderAuditLog;
+import com.mitchmele.interstellarexchange.loaderauditlog.repository.LoaderAuditLogRepository;
 import com.mitchmele.interstellarexchange.trade.Trade;
 import com.mitchmele.interstellarexchange.trade.repository.TradeRepository;
 import org.junit.jupiter.api.Test;
@@ -12,10 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +23,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TradeLoaderServiceTest {
@@ -35,6 +33,9 @@ class TradeLoaderServiceTest {
 
     @Mock
     private DateHelper dateHelper;
+
+    @Mock
+    private LoaderAuditLogRepository loaderAuditLogRepository;
 
     @InjectMocks
     private TradeLoaderService tradeLoaderService;
@@ -75,6 +76,10 @@ class TradeLoaderServiceTest {
 
 
         List<Trade> actual = tradeLoaderService.fetchTrades();
+
+        LoaderAuditLog loaderAuditLog = LoaderAuditLog.builder().loadCount(4).build();
+
+        verify(loaderAuditLogRepository).save(loaderAuditLog);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -183,7 +188,7 @@ class TradeLoaderServiceTest {
                 .timeStamp(mockTimestamp)
                 .build();
 
-        when(tradeRepository.findById(anyLong())).thenReturn(Optional.of(expectedTrade));
+        when(tradeRepository.findById(anyInt())).thenReturn(Optional.of(expectedTrade));
 
         Trade actual = tradeLoaderService.fetchTradeById(1);
         assertThat(actual).isEqualTo(expectedTrade);
@@ -192,7 +197,7 @@ class TradeLoaderServiceTest {
     @Test
     void fetchTradesById_throwsEntityNotFoundException_ifOptionalIsEmpty() {
 
-        when(tradeRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(tradeRepository.findById(anyInt()  )).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> tradeLoaderService.fetchTradeById(2))
                 .isInstanceOf(EntityNotFoundException.class);

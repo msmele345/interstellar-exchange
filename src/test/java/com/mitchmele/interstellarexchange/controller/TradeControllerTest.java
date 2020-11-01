@@ -4,14 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mitchmele.interstellarexchange.helpers.TradesForDatesRequest;
 import com.mitchmele.interstellarexchange.services.TradeLoaderService;
 import com.mitchmele.interstellarexchange.trade.Trade;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -22,10 +25,32 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+/*
+*
+* @BeforeEach
+public void setUp(WebApplicationContext webApplicationContext,
+  RestDocumentationContextProvider restDocumentation) {
+    this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+      .apply(documentationConfiguration(restDocumentation)).build();
+}
+*
+* //test clas
+* @ExtendWith({RestDocumentationExtension.class, SpringExtension.class})
+@SpringBootTest
+public class ApiDocumentationJUnit5IntegrationTest { //... }
+*
+*
+* this.mockMvc = MockMvcBuilders
+  //...
+  .alwaysDo(document("{method-name}",
+    preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())))
+  .build();
+* */
 
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +61,13 @@ class TradeControllerTest {
 
     @InjectMocks
     private TradeController tradeController;
+
+    MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(tradeController).build();
+    }
 
     @Test
     void loadAllTrades_fetchesAllTrades() throws Exception {
@@ -74,7 +106,6 @@ class TradeControllerTest {
         ObjectMapper mapper = new ObjectMapper();
         String expectedResponse = mapper.writeValueAsString(expected);
 
-        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(tradeController).build();
 
         mockMvc
                 .perform(get("/api/v1/trades"))
@@ -107,8 +138,6 @@ class TradeControllerTest {
         ObjectMapper mapper = new ObjectMapper();
         String expectedResponse = mapper.writeValueAsString(expected);
 
-        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(tradeController).build();
-
         mockMvc
                 .perform(get("/api/v1/trades/abc"))
                 .andExpect(status().is2xxSuccessful())
@@ -119,7 +148,6 @@ class TradeControllerTest {
 
     @Test
     void getTradesByDateRange_returnsListOfTradesForRequestedDateRange() throws Exception {
-        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(tradeController).build();
 
         TradesForDatesRequest tradesForDatesRequest = TradesForDatesRequest.builder()
                 .startDate("07-06-2020")
@@ -161,7 +189,6 @@ class TradeControllerTest {
 
     @Test
     void getTradeById() throws Exception {
-        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(tradeController).build();
 
         Trade expectedTrade = Trade.builder()
                 .id(2)
