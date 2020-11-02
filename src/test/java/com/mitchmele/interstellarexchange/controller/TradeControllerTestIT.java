@@ -2,6 +2,7 @@ package com.mitchmele.interstellarexchange.controller;
 
 import com.mitchmele.interstellarexchange.services.TradeLoaderService;
 import com.mitchmele.interstellarexchange.trade.Trade;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(TradeController.class)
 @AutoConfigureRestDocs("build/snippets")
+@Tag("IT")
 class TradeControllerTestIT {
 
     @Autowired

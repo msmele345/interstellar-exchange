@@ -19,11 +19,48 @@ repositories {
 	mavenCentral()
 }
 
-asciidoctor {
-	sourceDir 'src/main/asciidoc'
-	attributes 'snippets': file('build/snippets')
+ext {
+	snippetsDir = file('build/generated-snippets')
+}
+//
+//
+//test {
+//	outputs.dir snippetsDir
+//}
+
+task generateDocumentation(type: Test) {
+	group 'documentation'
+	description 'run tests that generate stubs for documentation'
+
+	scanForTestClasses = false
+	useJUnitPlatform {
+		includeTags "Documenation"
+		excludeTags "IT"
+	}
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStackTraces true
+		exceptionFormat "full"
+	}
 }
 
+asciidoctor {
+	sourceDir 'src/main/asciidoc'
+	snippetsDir = file('build/generated-snippets')
+	outputDir file('build/generated-docs')
+	attributes 'snippets': snippetsDir
+
+	dependsOn generateDocumentation //or dependsOn test
+}
+
+asciidoctor.doLast {
+	copy {
+		from file("build/generated-docs/html5")
+		into 'static/docs'
+		include "index.html", "rest.html"
+//        into file("$sourceSets.main.output.classesDirs/public") do I need this?
+	}
+}
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-activemq'
@@ -39,6 +76,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.3.1.RELEASE'
 	implementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
+	implementation "org.springframework.boot:spring-boot-starter-security"
+
 
 	implementation 'org.springframework.integration:spring-integration-jdbc:5.3.0.RELEASE'
 	compileOnly 'org.projectlombok:lombok'
@@ -52,4 +91,8 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+bootJar {
+	dependsOn asciidoctor
 }

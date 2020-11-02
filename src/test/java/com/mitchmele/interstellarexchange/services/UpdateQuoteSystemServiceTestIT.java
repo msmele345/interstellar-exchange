@@ -6,6 +6,7 @@ import com.mitchmele.interstellarexchange.quote.*;
 import com.mitchmele.interstellarexchange.ask.repository.AskRepository;
 import com.mitchmele.interstellarexchange.bid.repository.BidRepository;
 import com.mitchmele.interstellarexchange.trade.Trade;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Tag("IT")
 class UpdateQuoteSystemServiceTestIT {
 
     @Autowired

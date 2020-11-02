@@ -13,6 +13,11 @@
 == Trades API
 Collection of CRUD API endpoints used to view trades registered in the application/exchange.
 
+=== Response Fields with Definitions
+
+==== Fields
+include::{snippets}/get-trade-by-id/response-fields.adoc[]
+
 === Get Trade By Id
 Path Parameters
 include::{snippets}/get-trade-by-id/path-parameters.adoc[]
@@ -32,6 +37,16 @@ include::{snippets}/get-trades/http-request.adoc[]
 ==== Example Response
 include::{snippets}/get-trades/http-response.adoc[]
 
+=== Get All Trades For a Given Symbol
+
+==== Example Request
+Path Parameters
+include::{snippets}/get-trades-by-symbol/path-parameters.adoc[]
+
+include::{snippets}/get-trades-by-symbol/http-request.adoc[]
+
+==== Example Response
+include::{snippets}/get-trades-by-symbol/http-response.adoc[]
 
 - For more information on REST, checkout: link:rest.html[RESTful APIs]
 

@@ -3,6 +3,7 @@ package com.mitchmele.interstellarexchange.errorlogs;
 import com.mitchmele.interstellarexchange.errorlogs.repository.ErrorLogRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Disabled
+@Tag("IT")
 class ErrorLogServiceTestIT {
 
     @Autowired

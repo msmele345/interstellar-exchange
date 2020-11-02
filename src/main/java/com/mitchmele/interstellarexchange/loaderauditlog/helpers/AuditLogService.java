@@ -5,13 +5,19 @@ import com.mitchmele.interstellarexchange.loaderauditlog.repository.LoaderAuditL
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class AuditLogService {
 
     private final LoaderAuditLogRepository loaderAuditLogRepository;
 
-//    public LoaderAuditLog getLastLoadSize() {
-//
-//    }
+    public List<LoaderAuditLog> findAllStatuses() {
+        return loaderAuditLogRepository.findAll();
+    }
+
+    public void save(LoaderAuditLog loaderAuditLog) {
+        loaderAuditLogRepository.save(loaderAuditLog);
+    }
 }
