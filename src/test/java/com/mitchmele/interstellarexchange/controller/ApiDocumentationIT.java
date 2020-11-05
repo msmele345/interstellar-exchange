@@ -1,5 +1,7 @@
 package com.mitchmele.interstellarexchange.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mitchmele.interstellarexchange.helpers.TradesForDatesRequest;
 import com.mitchmele.interstellarexchange.services.TradeLoaderService;
 import com.mitchmele.interstellarexchange.trade.Trade;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,9 +9,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
@@ -17,20 +19,18 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,7 +79,7 @@ class ApiDocumentationIT {
 
         when(tradeLoaderService.fetchTradeById(anyInt())).thenReturn(trade);
 
-        this.mockMvc.perform(
+        mockMvc.perform(
                 RestDocumentationRequestBuilders
                         .get("/api/v1/trade/{id}", 1))
                 .andExpect(status().isOk())
@@ -158,12 +158,52 @@ class ApiDocumentationIT {
                 .andExpect(status().isOk())
                 .andDo(
                         document(
-                               "get-trades-by-symbol",
+                                "get-trades-by-symbol",
                                 preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
                                 pathParameters(parameterWithName("symbol").description("The symbol of the stock")),
                                 responseFields(
                                         fieldWithPath("[]").description("A list of all trades for a given symbol")
                                 ).andWithPrefix("[].", fields))
+                );
+    }
+
+    @Test
+    void getTradesByDateRange_findsTradesForRequestedDateRangeInPostRequest() throws Exception {
+
+        TradesForDatesRequest request = TradesForDatesRequest.builder()
+                .startDate("10-20-2020")
+                .endDate("10-21-2020")
+                .build();
+
+        FieldDescriptor[] requestFields = {
+                fieldWithPath("startDate").description("lower bound of date range request"),
+                fieldWithPath("endDate").description("upper bound of date range request")
+        };
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String serializedRequest = objectMapper.writeValueAsString(request);
+
+        Trade trade = Trade.builder()
+                .id(1).bidId(12).askId(32)
+                .symbol("AAPL")
+                .tradePrice(BigDecimal.valueOf(221.52))
+                .timeStamp(new Date())
+                .build();
+
+        when(tradeLoaderService.fetchTradesForSymbol(anyString()))
+                .thenReturn(singletonList(trade));
+
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/trades")
+                .content(serializedRequest)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isOk())
+                .andDo(
+                        document(
+                                "get-trades-for-date-range",
+                                preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
+                                requestFields(requestFields)
+                        )
                 );
     }
 }

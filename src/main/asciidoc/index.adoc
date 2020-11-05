@@ -48,6 +48,15 @@ include::{snippets}/get-trades-by-symbol/http-request.adoc[]
 ==== Example Response
 include::{snippets}/get-trades-by-symbol/http-response.adoc[]
 
+=== Get All Trades For a Given Date Range
+
+==== Example Request
+Request Fields
+include::{snippets}/get-trades-for-date-range/request-fields.adoc[]
+
+include::{snippets}/get-trades-for-date-range/http-request.adoc[]
+
+
 - For more information on REST, checkout: link:rest.html[RESTful APIs]
 
 

@@ -11,47 +11,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-/*
-*
-* @BeforeEach
-public void setUp(WebApplicationContext webApplicationContext,
-  RestDocumentationContextProvider restDocumentation) {
-    this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-      .apply(documentationConfiguration(restDocumentation)).build();
-}
-*
-* //test clas
-* @ExtendWith({RestDocumentationExtension.class, SpringExtension.class})
-@SpringBootTest
-public class ApiDocumentationJUnit5IntegrationTest { //... }
-*
-*
-* this.mockMvc = MockMvcBuilders
-  //...
-  .alwaysDo(document("{method-name}",
-    preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())))
-  .build();
-* */
-
 
 @ExtendWith(MockitoExtension.class)
 class TradeControllerTest {

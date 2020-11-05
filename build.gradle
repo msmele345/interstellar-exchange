@@ -22,11 +22,6 @@ repositories {
 ext {
 	snippetsDir = file('build/generated-snippets')
 }
-//
-//
-//test {
-//	outputs.dir snippetsDir
-//}
 
 task generateDocumentation(type: Test) {
 	group 'documentation'
@@ -46,19 +41,18 @@ task generateDocumentation(type: Test) {
 
 asciidoctor {
 	sourceDir 'src/main/asciidoc'
-	snippetsDir = file('build/generated-snippets')
 	outputDir file('build/generated-docs')
 	attributes 'snippets': snippetsDir
 
-	dependsOn generateDocumentation //or dependsOn test
+	dependsOn test
 }
 
 asciidoctor.doLast {
 	copy {
 		from file("build/generated-docs/html5")
-		into 'static/docs'
+//		into 'static/docs'
+		into './src/main/resources'
 		include "index.html", "rest.html"
-//        into file("$sourceSets.main.output.classesDirs/public") do I need this?
 	}
 }
 
@@ -76,9 +70,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.3.1.RELEASE'
 	implementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
-	implementation "org.springframework.boot:spring-boot-starter-security"
-
-
+//	implementation "org.springframework.boot:spring-boot-starter-security"
 	implementation 'org.springframework.integration:spring-integration-jdbc:5.3.0.RELEASE'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -89,6 +81,10 @@ dependencies {
 	}
 }
 
+build {
+	dependsOn asciidoctor
+}
+
 test {
 	useJUnitPlatform()
 }
@@ -96,3 +92,7 @@ test {
 bootJar {
 	dependsOn asciidoctor
 }
+
+//test {
+//	outputs.dir snippetsDir
+//}
