@@ -18,8 +18,8 @@ import static com.microsoft.sqlserver.jdbc.StringUtils.isEmpty;
 public class InterstellarUser extends User implements UserDetails {
 
 
-    public InterstellarUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities); //empty quote for password?
+    public InterstellarUser(String username, Collection<? extends GrantedAuthority> authorities) {
+        super(username, "", authorities); //empty quote for password?
     }
 
 //    private final ExchangeUser exchangeUser;

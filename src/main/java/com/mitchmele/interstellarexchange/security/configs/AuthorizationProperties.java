@@ -10,7 +10,6 @@ import org.springframework.test.context.ContextConfiguration;
 @Data
 @Component
 @NoArgsConstructor
-@AllArgsConstructor
 @ConfigurationProperties(prefix = "authorization")
 public class AuthorizationProperties {
 

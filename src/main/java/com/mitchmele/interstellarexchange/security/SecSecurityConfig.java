@@ -2,7 +2,9 @@ package com.mitchmele.interstellarexchange.security;
 
 import com.mitchmele.interstellarexchange.security.service.ExchangeUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,62 +19,47 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ExchangeUserDetailsService exchangeUserDetailsService;
 
-//    @Autowired
-//    @Qualifier("accountUserDetails")
-//    UserDetailsService userDetailsService;
-
-//    @Bean
-//    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-
-    //change to users - spring security may want that name
+    private final PasswordEncoder encoder =
+            PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+
         PasswordEncoder encoder =
                 PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        auth
-                .inMemoryAuthentication()
-                .withUser("admin")
-                .password(encoder.encode("admin1"))
-                .roles("USER", "ADMIN");
+//        auth
+//                .inMemoryAuthentication()
+//                .withUser("admin")
+//                .password(encoder.encode("admin1"))
+//                .roles("USER", "ADMIN");
 //
 
-//        auth.userDetailsService(userDetailsService)
-//                .passwordEncoder(encoder);
+        auth.authenticationProvider(getAuthenticationProvider());
     }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
 
-//        http.authorizeRequests().anyRequest().hasAnyRole("ADMIN", "USER")
-//                .and()
-//                .formLogin()
-//                .and()
-//                .logout().permitAll().logoutSuccessUrl("/login")
-//                .and()
-//                .csrf().disable();
-
-
-        //basic auth web based popup
-        http
-                .authorizeRequests()
-                .anyRequest()
-                .authenticated()
+        http.formLogin()
                 .and()
-                .httpBasic();
+                .authorizeRequests().anyRequest()
+                .fullyAuthenticated();
+//                .hasAnyRole("ROLE_ADMIN", "ROLE_USER");
+//                .antMatchers("/").hasAnyRole("ROLE_USER", "ROLE_ADMIN")
 
-//        http
 //                .csrf().disable()
+//        http
 //                .authorizeRequests()
-////                .antMatchers("/").hasAnyRole("USER", "ADMIN")
-//                .anyRequest().authenticated()
+//                .anyRequest().fullyAuthenticated()
 //                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .permitAll()
-//                .and().logout().permitAll();
+//                .httpBasic();
+    }
 
+    @Bean
+    public DaoAuthenticationProvider getAuthenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(exchangeUserDetailsService);
+        authenticationProvider.setPasswordEncoder(encoder);
+        return authenticationProvider;
     }
 }
