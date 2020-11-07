@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-@Configuration
+//@Configuration
 public class AccountConfiguration {
 
     @Bean("accountUserDetails")

@@ -2,6 +2,7 @@ package com.mitchmele.interstellarexchange.account;
 
 import com.mitchmele.interstellarexchange.exchangeuser.ExchangeUser;
 import com.mitchmele.interstellarexchange.exchangeuser.repository.UserRepository;
+import com.mitchmele.interstellarexchange.security.service.ExchangeUserDetailsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
