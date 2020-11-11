@@ -1,5 +1,6 @@
 package com.mitchmele.interstellarexchange.exchangeuser;
 
+import com.mitchmele.interstellarexchange.security.model.AuthRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -29,4 +31,8 @@ public class ExchangeUser {
     private String username;
     private String password;
     private boolean active;
+    private String role;
+
+    @ManyToMany
+    private Set<AuthRole> roles;
 }

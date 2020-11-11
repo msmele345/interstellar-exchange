@@ -10,12 +10,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import java.util.List;
 import java.util.Optional;
-
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,16 +37,51 @@ class ExchangeUserDetailsServiceTest {
                 .username("user")
                 .password("pass")
                 .active(true)
+                .role("ROLE_ADMIN")
                 .build();
 
         when(exUserRepository.findByUsername(anyString()))
                 .thenReturn(Optional.of(user));
 
+        List<GrantedAuthority> authorityList = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
+
+        UserDetails expected = User.builder()
+                .username("user")
+                .password("pass")
+                .accountExpired(false)
+                .accountLocked(false)
+                .credentialsExpired(false)
+                .authorities(authorityList)
+                .build();
+
         UserDetails actual = exchangeUserDetailsService.loadUserByUsername("user");
 
-        List<GrantedAuthority> authorityList = AuthorityUtils.createAuthorityList("ADMIN", "USER");
 
-        assertThat(actual.getAuthorities()).isEqualTo(authorityList);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void loadUserByUserName_doesNotGrantAuthoritiesIfExUserRoleIsNull() {
+
+        ExchangeUser exchangeUser = ExchangeUser.builder()
+                .username("user")
+                .password("pass")
+                .active(true)
+                .build();
+
+        when(exUserRepository.findByUsername(anyString()))
+                .thenReturn(Optional.of(exchangeUser));
+
+        UserDetails actual = exchangeUserDetailsService.loadUserByUsername("user");
+
+        UserDetails expected = User.builder()
+                .username("user")
+                .password("pass")
+                .authorities(emptyList())
+                .build();
+
+        assertThat(actual.getAuthorities()).isEmpty();
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

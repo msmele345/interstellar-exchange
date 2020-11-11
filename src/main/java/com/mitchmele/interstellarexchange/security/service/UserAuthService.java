@@ -13,6 +13,8 @@ public class UserAuthService implements AuthenticationUserDetailsService<Authent
 
     private final ExchangeUserDetailsService exchangeUserDetailsService;
 
+    //this is for some other way of identifying the user like an auth token
+
     @Override
     public UserDetails loadUserDetails(Authentication token) throws UsernameNotFoundException {
         String username = (String)token.getPrincipal();

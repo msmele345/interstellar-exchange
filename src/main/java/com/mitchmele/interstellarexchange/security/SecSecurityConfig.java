@@ -19,20 +19,8 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ExchangeUserDetailsService exchangeUserDetailsService;
 
-    private final PasswordEncoder encoder =
-            PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
     @Override
-    protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-
-        PasswordEncoder encoder =
-                PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//        auth
-//                .inMemoryAuthentication()
-//                .withUser("admin")
-//                .password(encoder.encode("admin1"))
-//                .roles("USER", "ADMIN");
-//
+    protected void configure(final AuthenticationManagerBuilder auth) {
 
         auth.authenticationProvider(getAuthenticationProvider());
     }
@@ -44,22 +32,12 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests().anyRequest()
                 .fullyAuthenticated();
-//                .hasAnyRole("ROLE_ADMIN", "ROLE_USER");
-//                .antMatchers("/").hasAnyRole("ROLE_USER", "ROLE_ADMIN")
-
-//                .csrf().disable()
-//        http
-//                .authorizeRequests()
-//                .anyRequest().fullyAuthenticated()
-//                .and()
-//                .httpBasic();
     }
 
     @Bean
     public DaoAuthenticationProvider getAuthenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(exchangeUserDetailsService);
-        authenticationProvider.setPasswordEncoder(encoder);
         return authenticationProvider;
     }
 }

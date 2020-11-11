@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.microsoft.sqlserver.jdbc.StringUtils.isEmpty;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 @Service
 @RequiredArgsConstructor
@@ -30,22 +33,25 @@ public class ExchangeUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     //check what type the user has (admin, user) add column in db
-    //this then goes to the auth service
     //do we need the auth service?
     //account registration form
+    //authentication providers have userDetails. Create Dao provider and set this as userDetails service
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         return userRepository.findByUsername(username)
                 .map(account -> {
+
+                    String role = account.getRole();
                     boolean active = account.isActive();
+
                     return User.builder()
                           .username(account.getUsername())
                           .password("{noop}"+account.getPassword())
                           .accountExpired(!active)
                           .accountLocked(!active)
-                          .authorities(AuthorityUtils.createAuthorityList("ROLE_ADMIN", "ROLE_USER"))
+                          .authorities(!isEmpty(role) ? singletonList(new SimpleGrantedAuthority(role)) : emptyList())
                           .build();
                 })
                 .orElseThrow(
@@ -53,6 +59,7 @@ public class ExchangeUserDetailsService implements UserDetailsService {
                 );
     }
 
+    //setup join table with roles
     private List<GrantedAuthority> mapAuthorities(List<String> authRoles) {
         return authRoles.stream()
                 .map(SimpleGrantedAuthority::new)
